@@ -6,7 +6,7 @@ import ApperIcon from "@/components/ApperIcon";
 import Checkbox from "@/components/atoms/Checkbox";
 import { taskService } from "@/services/api/taskService";
 
-const TaskItem = ({ task, onUpdate, onDelete }) => {
+const TaskItem = ({ task, onUpdate, onDelete, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleToggleComplete = async () => {
@@ -61,12 +61,16 @@ const TaskItem = ({ task, onUpdate, onDelete }) => {
               />
             </div>
 
-            <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-gray-900 mb-2 transition-all duration-200 ${
-                task.completed 
-                  ? "line-through text-gray-500" 
-                  : ""
-              }`}>
+<div className="flex-1 min-w-0">
+              <h3 
+                className={`font-semibold text-gray-900 mb-2 transition-all duration-200 cursor-pointer hover:text-primary ${
+                  task.completed 
+                    ? "line-through text-gray-500" 
+                    : ""
+                }`}
+                onClick={() => onEdit && onEdit(task)}
+                title="Click to edit"
+              >
                 {task.title}
               </h3>
               
@@ -92,6 +96,15 @@ const TaskItem = ({ task, onUpdate, onDelete }) => {
               </div>
             </div>
 
+<motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onEdit && onEdit(task)}
+              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+              title="Edit task"
+            >
+              <ApperIcon name="Edit3" className="w-4 h-4" />
+            </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}

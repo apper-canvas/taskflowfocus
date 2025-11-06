@@ -1,21 +1,25 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { taskService } from "@/services/api/taskService";
+import EditTaskModal from "@/components/organisms/EditTaskModal";
+import ApperIcon from "@/components/ApperIcon";
+import Checkbox from "@/components/atoms/Checkbox";
 import Header from "@/components/organisms/Header";
-import TaskCounter from "@/components/molecules/TaskCounter";
 import TaskList from "@/components/organisms/TaskList";
-import AddTaskButton from "@/components/molecules/AddTaskButton";
 import AddTaskModal from "@/components/organisms/AddTaskModal";
+import AddTaskButton from "@/components/molecules/AddTaskButton";
+import TaskCounter from "@/components/molecules/TaskCounter";
+import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import { taskService } from "@/services/api/taskService";
 
 const HomePage = () => {
-  const [tasks, setTasks] = useState([]);
+const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState(null);
 
   const loadTasks = async () => {
     try {
@@ -35,7 +39,7 @@ const HomePage = () => {
     loadTasks();
   }, []);
 
-  const handleTaskAdded = (newTask) => {
+const handleTaskAdded = (newTask) => {
     setTasks(prev => [newTask, ...prev]);
   };
 
@@ -43,6 +47,10 @@ const HomePage = () => {
     setTasks(prev => 
       prev.map(task => task.Id === updatedTask.Id ? updatedTask : task)
     );
+  };
+
+  const handleTaskEdit = (task) => {
+    setEditingTaskId(task.Id);
   };
 
   const handleTaskDelete = (taskId) => {
@@ -96,20 +104,28 @@ const HomePage = () => {
                 </span>
               </div>
               
-              <TaskList 
+<TaskList 
                 tasks={tasks}
                 onUpdateTask={handleTaskUpdate}
                 onDeleteTask={handleTaskDelete}
+                onEditTask={handleTaskEdit}
               />
             </div>
           )}
         </motion.div>
 
         {/* Add Task Modal */}
-        <AddTaskModal
+<AddTaskModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onTaskAdded={handleTaskAdded}
+        />
+        
+        <EditTaskModal
+          isOpen={!!editingTaskId}
+          onClose={() => setEditingTaskId(null)}
+          task={tasks.find(t => t.Id === editingTaskId)}
+          onTaskUpdated={handleTaskUpdate}
         />
       </div>
     </div>

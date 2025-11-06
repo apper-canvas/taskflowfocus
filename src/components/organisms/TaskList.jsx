@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import TaskItem from "@/components/molecules/TaskItem";
 
-const TaskList = ({ tasks, onUpdateTask, onDeleteTask }) => {
+const TaskList = ({ tasks, onUpdateTask, onDeleteTask, onEditTask }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -15,10 +15,11 @@ const TaskList = ({ tasks, onUpdateTask, onDeleteTask }) => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <TaskItem
+<TaskItem
             task={task}
             onUpdate={onUpdateTask}
             onDelete={onDeleteTask}
+            onEdit={onEditTask}
           />
         </motion.div>
       ))}
