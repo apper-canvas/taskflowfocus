@@ -46,12 +46,13 @@ class TaskService {
       setTimeout(() => {
 const tasks = this.getTasks();
         const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0;
-        const newTask = {
+const newTask = {
           Id: maxId + 1,
           title: taskData.title,
           description: taskData.description,
           dueDate: taskData.dueDate || null,
           priority: taskData.priority || 'Medium',
+          category: taskData.category || 'Work',
           completed: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
@@ -76,6 +77,7 @@ const updatedTask = {
             ...taskData,
             dueDate: taskData.dueDate !== undefined ? taskData.dueDate : tasks[taskIndex].dueDate,
             priority: taskData.priority !== undefined ? taskData.priority : tasks[taskIndex].priority,
+            category: taskData.category !== undefined ? taskData.category : tasks[taskIndex].category,
             updatedAt: new Date().toISOString()
           };
           tasks[taskIndex] = updatedTask;

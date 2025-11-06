@@ -4,6 +4,7 @@
     "title": "Complete project documentation",
     "description": "Write comprehensive documentation for the new task management system",
     "dueDate": "2024-01-25T00:00:00.000Z",
+    "category": "Work",
     "completed": false,
     "createdAt": "2024-01-15T09:00:00.000Z",
     "updatedAt": "2024-01-15T09:00:00.000Z"
@@ -13,6 +14,7 @@
     "title": "Review and test user authentication",
     "description": "Ensure all authentication flows work correctly",
     "dueDate": "2024-01-20T00:00:00.000Z",
+    "category": "Work",
     "completed": true,
     "createdAt": "2024-01-14T10:30:00.000Z",
     "updatedAt": "2024-01-16T14:20:00.000Z"
@@ -22,6 +24,7 @@
     "title": "Update database schema",
     "description": "Add new fields to support enhanced task features",
     "dueDate": "2024-01-30T00:00:00.000Z",
+    "category": "Work",
     "completed": false,
     "createdAt": "2024-01-13T15:45:00.000Z",
     "updatedAt": "2024-01-13T15:45:00.000Z"
@@ -31,6 +34,7 @@
     "title": "Design new landing page",
     "description": "Create mockups and wireframes for the updated landing page",
     "dueDate": null,
+    "category": "Personal",
     "completed": false,
     "createdAt": "2024-01-12T11:15:00.000Z",
     "updatedAt": "2024-01-12T11:15:00.000Z"
@@ -40,6 +44,7 @@
     "title": "Implement notification system",
     "description": "Build email and in-app notification features",
     "dueDate": "2024-02-01T00:00:00.000Z",
+    "category": "Work",
     "completed": false,
     "createdAt": "2024-01-11T16:30:00.000Z",
     "updatedAt": "2024-01-11T16:30:00.000Z"
@@ -49,6 +54,7 @@
     "title": "Optimize application performance",
     "description": "Identify and fix performance bottlenecks",
     "dueDate": "1/18/2024 12:00:00 AMZ",
+    "category": "Work",
     "completed": true,
     "createdAt": "2024-01-10T08:45:00.000Z",
     "updatedAt": "2024-01-17T12:10:00.000Z"

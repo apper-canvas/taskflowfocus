@@ -12,7 +12,8 @@ const [formData, setFormData] = useState({
     title: "",
     description: "",
     dueDate: "",
-    priority: "Medium"
+    priority: "Medium",
+    category: "Work"
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,11 +31,12 @@ const newTask = await taskService.create({
         title: formData.title.trim(),
         description: formData.description.trim(),
         dueDate: formData.dueDate || null,
-        priority: formData.priority
+        priority: formData.priority,
+        category: formData.category
       });
       
 onTaskAdded(newTask);
-      setFormData({ title: "", description: "", dueDate: "", priority: "Medium" });
+setFormData({ title: "", description: "", dueDate: "", priority: "Medium", category: "Work" });
       onClose();
       toast.success("Task created successfully! 🎯");
     } catch (error) {
@@ -46,7 +48,7 @@ onTaskAdded(newTask);
 
   const handleClose = () => {
     if (!isSubmitting) {
-setFormData({ title: "", description: "", dueDate: "", priority: "Medium" });
+setFormData({ title: "", description: "", dueDate: "", priority: "Medium", category: "Work" });
       onClose();
     }
   };
@@ -117,7 +119,25 @@ setFormData({ title: "", description: "", dueDate: "", priority: "Medium" });
                   rows={4}
                   disabled={isSubmitting}
                 />
-</div>
+{/* Category Field */}
+          <div className="space-y-2">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <select
+              id="category"
+              value={formData.category}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="Work">Work</option>
+              <option value="Personal">Personal</option>
+              <option value="Health">Health</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Learning">Learning</option>
+            </select>
+          </div>
+        </div>
 <div>
                 <label htmlFor="add-priority" className="block text-sm font-medium text-gray-700 mb-2">
                   Priority Level

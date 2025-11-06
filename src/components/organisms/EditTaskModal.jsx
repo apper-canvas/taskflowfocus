@@ -12,17 +12,19 @@ const [formData, setFormData] = useState({
     title: "",
     description: "",
     dueDate: "",
-    priority: "Medium"
+    priority: "Medium",
+    category: "Work"
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
 if (task) {
 setFormData({
-        title: task.title || "",
+title: task.title || "",
         description: task.description || "",
         dueDate: task.dueDate ? task.dueDate.split('T')[0] : "",
-        priority: task.priority || "Medium"
+        priority: task.priority || "Medium",
+        category: task.category || "Work"
       });
     }
   }, [task]);
@@ -41,7 +43,8 @@ const updatedTask = await taskService.update(task.Id, {
         title: formData.title.trim(),
         description: formData.description.trim(),
         dueDate: formData.dueDate || null,
-        priority: formData.priority
+        priority: formData.priority,
+        category: formData.category
       });
       
       if (updatedTask) {
@@ -66,7 +69,8 @@ setFormData({
           title: task.title || "",
           description: task.description || "",
           dueDate: task.dueDate ? task.dueDate.split('T')[0] : "",
-          priority: task.priority || "Medium"
+          priority: task.priority || "Medium",
+          category: task.category || "Work"
         });
       }
       onClose();
@@ -141,7 +145,25 @@ setFormData({
                 />
               </div>
 
-<div>
+{/* Category Field */}
+          <div className="space-y-2">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <select
+              id="category"
+              value={formData.category}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="Work">Work</option>
+              <option value="Personal">Personal</option>
+              <option value="Health">Health</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Learning">Learning</option>
+            </select>
+          </div>
+        <div>
                 <label htmlFor="edit-priority" className="block text-sm font-medium text-gray-700 mb-2">
                   Priority Level
                 </label>
