@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { taskService } from "@/services/api/taskService";
-import EditTaskModal from "@/components/organisms/EditTaskModal";
 import ApperIcon from "@/components/ApperIcon";
+import Input from "@/components/atoms/Input";
 import Checkbox from "@/components/atoms/Checkbox";
+import EditTaskModal from "@/components/organisms/EditTaskModal";
 import Header from "@/components/organisms/Header";
 import TaskList from "@/components/organisms/TaskList";
 import AddTaskModal from "@/components/organisms/AddTaskModal";
@@ -16,6 +17,7 @@ import Loading from "@/components/ui/Loading";
 
 const HomePage = () => {
 const [tasks, setTasks] = useState([]);
+const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,33 +62,44 @@ const handleTaskAdded = (newTask) => {
 const stats = taskService.getStats();
 
   // Filter functions
-  const filterTasks = (tasks, filter) => {
+const filterTasks = (tasks, filter, search = '') => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    // First apply search filter if search term exists
+    let filteredTasks = tasks;
+    if (search.trim()) {
+      const searchLower = search.toLowerCase();
+      filteredTasks = tasks.filter(task => 
+        task.title?.toLowerCase().includes(searchLower) ||
+        task.description?.toLowerCase().includes(searchLower) ||
+        task.category?.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Then apply status/priority filters
     switch (filter) {
       case 'active':
-        return tasks.filter(task => !task.completed);
+        return filteredTasks.filter(task => !task.completed);
       case 'completed':
-        return tasks.filter(task => task.completed);
+        return filteredTasks.filter(task => task.completed);
       case 'due-today':
-        return tasks.filter(task => {
+        return filteredTasks.filter(task => {
           if (!task.dueDate) return false;
           const taskDue = new Date(task.dueDate);
           taskDue.setHours(0, 0, 0, 0);
           return taskDue.getTime() === today.getTime();
         });
       case 'high-priority':
-        return tasks.filter(task => task.priority === 'high');
+        return filteredTasks.filter(task => task.priority === 'high');
       case 'low-priority':
-        return tasks.filter(task => task.priority === 'low');
+        return filteredTasks.filter(task => task.priority === 'low');
       default:
-        return tasks;
+        return filteredTasks;
     }
   };
 
-  const filteredTasks = filterTasks(tasks, activeFilter);
-
+const filteredTasks = filterTasks(tasks, activeFilter, searchTerm);
   const filterOptions = [
     { key: 'all', label: 'All Tasks' },
     { key: 'active', label: 'Active Tasks' },
@@ -127,8 +140,7 @@ const stats = taskService.getStats();
             onClick={() => setIsModalOpen(true)}
           />
 
-          {/* Task List or Empty State */}
-{/* Filter Buttons */}
+{/* Task List or Empty State */}
           {tasks.length > 0 && (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
@@ -136,8 +148,25 @@ const stats = taskService.getStats();
               transition={{ delay: 0.5 }}
               className="space-y-4"
             >
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">Filter Tasks</h3>
+              <div className="space-y-4">
+                {/* Search Bar */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <ApperIcon name="Search" size={20} className="text-gray-400" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Search tasks by title, description, or category..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-full"
+                  />
+                </div>
+                
+                {/* Filter Section */}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">Filter Tasks</h3>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {filterOptions.map((option) => (
@@ -182,8 +211,8 @@ const stats = taskService.getStats();
                 Show All Tasks
               </button>
             </motion.div>
-          ) : (
-<div className="space-y-6">
+) : (
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Your Tasks
@@ -198,7 +227,7 @@ const stats = taskService.getStats();
                 </span>
               </div>
               
-<TaskList 
+              <TaskList 
                 tasks={filteredTasks}
                 onUpdateTask={handleTaskUpdate}
                 onDeleteTask={handleTaskDelete}
@@ -208,8 +237,8 @@ const stats = taskService.getStats();
           )}
         </motion.div>
 
-        {/* Add Task Modal */}
-<AddTaskModal
+{/* Add Task Modal */}
+        <AddTaskModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onTaskAdded={handleTaskAdded}
@@ -221,6 +250,7 @@ const stats = taskService.getStats();
           task={tasks.find(t => t.Id === editingTaskId)}
           onTaskUpdated={handleTaskUpdate}
         />
+        </motion.div>
       </div>
     </div>
   );
