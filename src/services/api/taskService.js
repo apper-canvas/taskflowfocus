@@ -1,4 +1,6 @@
 import mockTasks from "../mockData/tasks.json";
+import React from "react";
+import Error from "@/components/ui/Error";
 class TaskService {
   constructor() {
     this.storageKey = "taskflow_tasks";
@@ -125,10 +127,28 @@ const updatedTask = {
 
 getStats() {
     const tasks = this.getTasks();
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    const completedTasks = tasks.filter(t => t.completed);
+    const completedToday = completedTasks.filter(t => {
+      if (!t.completedAt) return false;
+      const completedDate = new Date(t.completedAt);
+      return completedDate >= startOfToday;
+    });
+    
+    const overdueTasks = tasks.filter(t => {
+      if (t.completed || !t.dueDate) return false;
+      const dueDate = new Date(t.dueDate);
+      return dueDate < startOfToday;
+    });
+    
     return {
       total: tasks.length,
-      completed: tasks.filter(t => t.completed).length,
-      pending: tasks.filter(t => !t.completed).length
+      completed: completedTasks.length,
+      pending: tasks.filter(t => !t.completed).length,
+      completedToday: completedToday.length,
+      overdue: overdueTasks.length
     };
   }
 
@@ -211,11 +231,10 @@ getStats() {
         localStorage.setItem(this.storageKey, JSON.stringify(updatedTasks));
         resolve(validIds);
       }, 350);
+}, 350);
     });
   }
-  }
-
-  sortTasks(tasks, sortOrder) {
+sortTasks(tasks, sortOrder) {
     if (!tasks || tasks.length === 0) return tasks;
     
     const tasksCopy = [...tasks];

@@ -16,6 +16,61 @@ import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Loading from "@/components/ui/Loading";
 
+// Progress Section Component
+const ProgressSection = ({ stats }) => {
+  const progressPercentage = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl p-6 shadow-lg border border-indigo-100 mb-8"
+    >
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
+          <ApperIcon name="BarChart3" size={20} className="text-white" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-800">Progress Overview</h2>
+      </div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="text-center p-4 bg-white/60 rounded-xl border border-gray-100">
+          <div className="text-2xl font-bold text-gray-800">{stats.total}</div>
+          <div className="text-sm text-gray-600 font-medium">Total Tasks</div>
+        </div>
+        <div className="text-center p-4 bg-white/60 rounded-xl border border-gray-100">
+          <div className="text-2xl font-bold text-green-600">{stats.completedToday}</div>
+          <div className="text-sm text-gray-600 font-medium">Completed Today</div>
+        </div>
+        <div className="text-center p-4 bg-white/60 rounded-xl border border-gray-100">
+          <div className="text-2xl font-bold text-red-500">{stats.overdue}</div>
+          <div className="text-sm text-gray-600 font-medium">Overdue Tasks</div>
+        </div>
+        <div className="text-center p-4 bg-white/60 rounded-xl border border-gray-100">
+          <div className="text-2xl font-bold text-indigo-600">{progressPercentage}%</div>
+          <div className="text-sm text-gray-600 font-medium">Complete</div>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm font-medium text-gray-700">
+          <span>Overall Progress</span>
+          <span>{stats.completed} of {stats.total} completed</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercentage}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-pulse"></div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 const HomePage = () => {
 const [tasks, setTasks] = useState([]);
 const [searchTerm, setSearchTerm] = useState('');
@@ -216,6 +271,9 @@ return (
           transition={{ delay: 0.4 }}
           className="space-y-8"
         >
+{/* Progress Section */}
+          <ProgressSection stats={stats} />
+          
           {/* Stats */}
           <TaskCounter 
             total={stats.total}
