@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import TaskItem from "@/components/molecules/TaskItem";
 
-const TaskList = ({ tasks, onUpdateTask, onDeleteTask, onEditTask }) => {
+const TaskList = ({ tasks, onUpdateTask, onDeleteTask, onEditTask, selectionMode, selectedTaskIds, onToggleTaskSelection }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -20,6 +20,9 @@ const TaskList = ({ tasks, onUpdateTask, onDeleteTask, onEditTask }) => {
             onUpdate={onUpdateTask}
             onDelete={onDeleteTask}
             onEdit={onEditTask}
+            selectionMode={selectionMode}
+            isSelected={selectedTaskIds?.includes(task.Id)}
+            onToggleSelection={() => onToggleTaskSelection && onToggleTaskSelection(task.Id)}
           />
         </motion.div>
       ))}

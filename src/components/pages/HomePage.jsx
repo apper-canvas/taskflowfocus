@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import Checkbox from "@/components/atoms/Checkbox";
 import EditTaskModal from "@/components/organisms/EditTaskModal";
@@ -24,6 +25,9 @@ const [searchTerm, setSearchTerm] = useState('');
   const [editingTaskId, setEditingTaskId] = useState(null);
 const [activeFilter, setActiveFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('dueDate');
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+
   const loadTasks = async () => {
     try {
       setLoading(true);
@@ -56,8 +60,83 @@ const handleTaskAdded = (newTask) => {
     setEditingTaskId(task.Id);
   };
 
-  const handleTaskDelete = (taskId) => {
+const handleTaskDelete = (taskId) => {
     setTasks(prev => prev.filter(task => task.Id !== taskId));
+  };
+
+  // Selection handlers
+  const toggleTaskSelection = (taskId) => {
+    setSelectedTaskIds(prev => 
+      prev.includes(taskId) 
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId]
+    );
+  };
+
+  const selectAllTasks = () => {
+    const visibleTaskIds = filteredTasks.map(task => task.Id);
+    setSelectedTaskIds(visibleTaskIds);
+  };
+
+  const clearSelection = () => {
+    setSelectedTaskIds([]);
+  };
+
+  const toggleSelectionMode = () => {
+    setSelectionMode(prev => !prev);
+    setSelectedTaskIds([]);
+  };
+
+  // Bulk operation handlers
+  const handleBulkComplete = async () => {
+    if (selectedTaskIds.length === 0) return;
+    
+    try {
+      await taskService.markMultipleComplete(selectedTaskIds);
+      setTasks(prev => prev.map(task => 
+        selectedTaskIds.includes(task.Id) 
+          ? { ...task, completed: true }
+          : task
+      ));
+      toast.success(`Marked ${selectedTaskIds.length} tasks as complete`);
+      clearSelection();
+    } catch (error) {
+      toast.error('Failed to mark tasks as complete');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedTaskIds.length === 0) return;
+    
+    if (!confirm(`Are you sure you want to delete ${selectedTaskIds.length} tasks? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await taskService.deleteMultiple(selectedTaskIds);
+      setTasks(prev => prev.filter(task => !selectedTaskIds.includes(task.Id)));
+      toast.success(`Deleted ${selectedTaskIds.length} tasks`);
+      clearSelection();
+    } catch (error) {
+      toast.error('Failed to delete tasks');
+    }
+  };
+
+  const handleBulkCategoryChange = async (newCategory) => {
+    if (selectedTaskIds.length === 0) return;
+    
+    try {
+      await taskService.updateMultipleCategory(selectedTaskIds, newCategory);
+      setTasks(prev => prev.map(task => 
+        selectedTaskIds.includes(task.Id) 
+          ? { ...task, category: newCategory }
+          : task
+      ));
+      toast.success(`Updated category for ${selectedTaskIds.length} tasks`);
+      clearSelection();
+    } catch (error) {
+      toast.error('Failed to update task categories');
+    }
   };
 
 const stats = taskService.getStats();
@@ -144,10 +223,102 @@ return (
             pending={stats.pending}
           />
 
-          {/* Add Task Button */}
-          <AddTaskButton 
-            onClick={() => setIsModalOpen(true)}
-          />
+{/* Task Actions */}
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={toggleSelectionMode}
+              variant={selectionMode ? "secondary" : "outline"}
+              className="flex items-center gap-2"
+            >
+              <ApperIcon name={selectionMode ? "X" : "CheckSquare"} size={16} />
+              {selectionMode ? "Cancel" : "Select Tasks"}
+            </Button>
+            
+            <AddTaskButton 
+              onClick={() => setIsModalOpen(true)}
+            />
+          </div>
+
+          {/* Bulk Actions Toolbar */}
+          {selectionMode && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4"
+            >
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-blue-700 font-medium">
+                    {selectedTaskIds.length} of {filteredTasks.length} tasks selected
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={selectAllTasks}
+                      variant="outline"
+                      size="sm"
+                      className="text-blue-600 border-blue-300 hover:bg-blue-100"
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      onClick={clearSelection}
+                      variant="outline"
+                      size="sm"
+                      className="text-blue-600 border-blue-300 hover:bg-blue-100"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+                
+                {selectedTaskIds.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      onClick={handleBulkComplete}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <ApperIcon name="Check" size={14} className="mr-1" />
+                      Mark Complete
+                    </Button>
+                    
+                    <div className="relative group">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                      >
+                        <ApperIcon name="Tag" size={14} className="mr-1" />
+                        Change Category
+                        <ApperIcon name="ChevronDown" size={14} className="ml-1" />
+                      </Button>
+                      <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 min-w-[140px]">
+                        {['Work', 'Personal', 'Health', 'Learning'].map(category => (
+                          <button
+                            key={category}
+                            onClick={() => handleBulkCategoryChange(category)}
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            {category}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <Button
+                      onClick={handleBulkDelete}
+                      size="sm"
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                    >
+                      <ApperIcon name="Trash2" size={14} className="mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
 
           {/* Task List or Empty State */}
           {filteredTasks.length === 0 && tasks.length === 0 ? (
@@ -258,10 +429,13 @@ return (
                 </div>
                 
                 <TaskList 
-                  tasks={sortedTasks}
+tasks={sortedTasks}
                   onUpdateTask={handleTaskUpdate}
                   onDeleteTask={handleTaskDelete}
                   onEditTask={handleTaskEdit}
+                  selectionMode={selectionMode}
+                  selectedTaskIds={selectedTaskIds}
+                  onToggleTaskSelection={toggleTaskSelection}
                 />
               </div>
             </motion.div>

@@ -6,7 +6,7 @@ import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Checkbox from "@/components/atoms/Checkbox";
 
-const TaskItem = ({ task, onUpdate, onDelete, onEdit }) => {
+const TaskItem = ({ task, onUpdate, onDelete, onEdit, selectionMode, isSelected, onToggleSelection }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleToggleComplete = async () => {
@@ -58,7 +58,16 @@ className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200
             'border-gray-100'
           }`}
         >
-          <div className="flex items-start gap-4">
+<div className="flex items-start gap-4">
+            {selectionMode && (
+              <div className="pt-1">
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onToggleSelection}
+                  className="border-blue-300"
+                />
+              </div>
+            )}
             <div className="pt-1">
               <Checkbox
                 checked={task.completed}

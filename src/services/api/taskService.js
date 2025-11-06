@@ -1,5 +1,4 @@
 import mockTasks from "../mockData/tasks.json";
-
 class TaskService {
   constructor() {
     this.storageKey = "taskflow_tasks";
@@ -124,13 +123,96 @@ const updatedTask = {
     });
   }
 
-  getStats() {
+getStats() {
     const tasks = this.getTasks();
     return {
       total: tasks.length,
       completed: tasks.filter(t => t.completed).length,
       pending: tasks.filter(t => !t.completed).length
-};
+    };
+  }
+
+  // Bulk operations
+  async markMultipleComplete(taskIds) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (!Array.isArray(taskIds) || taskIds.length === 0) {
+          reject(new Error('Task IDs must be a non-empty array'));
+          return;
+        }
+
+        const validIds = taskIds.filter(id => Number.isInteger(id) && id > 0);
+        if (validIds.length !== taskIds.length) {
+          reject(new Error('All task IDs must be positive integers'));
+          return;
+        }
+
+        const tasks = this.getTasks();
+        const updatedTasks = tasks.map(task => 
+          validIds.includes(task.Id) 
+            ? { ...task, completed: true, updatedAt: new Date().toISOString() } 
+            : task
+        );
+        
+        localStorage.setItem(this.storageKey, JSON.stringify(updatedTasks));
+        resolve(validIds);
+      }, 300);
+    });
+  }
+
+  async deleteMultiple(taskIds) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (!Array.isArray(taskIds) || taskIds.length === 0) {
+          reject(new Error('Task IDs must be a non-empty array'));
+          return;
+        }
+
+        const validIds = taskIds.filter(id => Number.isInteger(id) && id > 0);
+        if (validIds.length !== taskIds.length) {
+          reject(new Error('All task IDs must be positive integers'));
+          return;
+        }
+
+        const tasks = this.getTasks();
+        const remainingTasks = tasks.filter(task => !validIds.includes(task.Id));
+        localStorage.setItem(this.storageKey, JSON.stringify(remainingTasks));
+        resolve(validIds);
+      }, 400);
+    });
+  }
+
+  async updateMultipleCategory(taskIds, newCategory) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (!Array.isArray(taskIds) || taskIds.length === 0) {
+          reject(new Error('Task IDs must be a non-empty array'));
+          return;
+        }
+        
+        if (!newCategory || typeof newCategory !== 'string') {
+          reject(new Error('Category must be a non-empty string'));
+          return;
+        }
+
+        const validIds = taskIds.filter(id => Number.isInteger(id) && id > 0);
+        if (validIds.length !== taskIds.length) {
+          reject(new Error('All task IDs must be positive integers'));
+          return;
+        }
+
+        const tasks = this.getTasks();
+        const updatedTasks = tasks.map(task => 
+          validIds.includes(task.Id) 
+            ? { ...task, category: newCategory, updatedAt: new Date().toISOString() } 
+            : task
+        );
+        
+        localStorage.setItem(this.storageKey, JSON.stringify(updatedTasks));
+        resolve(validIds);
+      }, 350);
+    });
+  }
   }
 
   sortTasks(tasks, sortOrder) {
