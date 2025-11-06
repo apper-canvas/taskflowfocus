@@ -1,4 +1,5 @@
 import mockTasks from "../mockData/tasks.json";
+
 class TaskService {
   constructor() {
     this.storageKey = "taskflow_tasks";
@@ -129,7 +130,44 @@ const updatedTask = {
       total: tasks.length,
       completed: tasks.filter(t => t.completed).length,
       pending: tasks.filter(t => !t.completed).length
-    };
+};
+  }
+
+  sortTasks(tasks, sortOrder) {
+    if (!tasks || tasks.length === 0) return tasks;
+    
+    const tasksCopy = [...tasks];
+    
+    switch (sortOrder) {
+      case 'dueDate':
+        return tasksCopy.sort((a, b) => {
+          if (!a.dueDate && !b.dueDate) return 0;
+          if (!a.dueDate) return 1; // Tasks without due date go to end
+          if (!b.dueDate) return -1;
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        });
+        
+      case 'priority':
+        const priorityOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
+        return tasksCopy.sort((a, b) => {
+          const aPriority = priorityOrder[a.priority] ?? 3;
+          const bPriority = priorityOrder[b.priority] ?? 3;
+          return aPriority - bPriority;
+        });
+        
+      case 'createdAt':
+        return tasksCopy.sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt); // Newest first
+        });
+        
+      case 'alphabetical':
+        return tasksCopy.sort((a, b) => {
+          return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+        });
+        
+      default:
+        return tasksCopy;
+    }
   }
 }
 

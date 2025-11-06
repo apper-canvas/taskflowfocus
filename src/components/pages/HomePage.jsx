@@ -22,7 +22,8 @@ const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('all');
+const [activeFilter, setActiveFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('dueDate');
   const loadTasks = async () => {
     try {
       setLoading(true);
@@ -100,6 +101,7 @@ const filterTasks = (tasks, filter, search = '') => {
   };
 
 const filteredTasks = filterTasks(tasks, activeFilter, searchTerm);
+  const sortedTasks = taskService.sortTasks(filteredTasks, sortOrder);
   const filterOptions = [
     { key: 'all', label: 'All Tasks' },
     { key: 'active', label: 'Active Tasks' },
@@ -117,7 +119,14 @@ const filteredTasks = filterTasks(tasks, activeFilter, searchTerm);
     return <Error message={error} onRetry={loadTasks} />;
   }
 
-  return (
+const sortOptions = [
+    { value: 'dueDate', label: 'Due Date' },
+    { value: 'priority', label: 'Priority' },
+    { value: 'createdAt', label: 'Created Date' },
+    { value: 'alphabetical', label: 'Alphabetical' }
+  ];
+
+return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Header />
@@ -140,8 +149,26 @@ const filteredTasks = filterTasks(tasks, activeFilter, searchTerm);
             onClick={() => setIsModalOpen(true)}
           />
 
-{/* Task List or Empty State */}
-          {tasks.length > 0 && (
+          {/* Task List or Empty State */}
+          {filteredTasks.length === 0 && tasks.length === 0 ? (
+            <Empty onAddTask={() => setIsModalOpen(true)} />
+          ) : filteredTasks.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-12"
+            >
+              <ApperIcon name="Filter" size={48} className="text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks match your filter</h3>
+              <p className="text-gray-500 mb-4">Try selecting a different filter or add new tasks.</p>
+              <button
+                onClick={() => setActiveFilter('all')}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Show All Tasks
+              </button>
+            </motion.div>
+          ) : (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -165,9 +192,33 @@ const filteredTasks = filterTasks(tasks, activeFilter, searchTerm);
                 
                 {/* Filter Section */}
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">Filter Tasks</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Filter & Sort Tasks</h3>
+                </div>
+                
+                {/* Sort Options */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Sort By</h4>
+                  <div className="relative">
+                    <select
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+                    >
+                      {sortOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ApperIcon 
+                      name="ChevronDown" 
+                      size={16} 
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" 
+                    />
+                  </div>
                 </div>
               </div>
+              
               <div className="flex flex-wrap gap-2">
                 {filterOptions.map((option) => (
                   <motion.button
@@ -190,67 +241,54 @@ const filteredTasks = filterTasks(tasks, activeFilter, searchTerm);
                   </motion.button>
                 ))}
               </div>
-            </motion.div>
-          )}
 
-          {filteredTasks.length === 0 && tasks.length === 0 ? (
-            <Empty onAddTask={() => setIsModalOpen(true)} />
-          ) : filteredTasks.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12"
-            >
-              <ApperIcon name="Filter" size={48} className="text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks match your filter</h3>
-              <p className="text-gray-500 mb-4">Try selecting a different filter or add new tasks.</p>
-              <button
-                onClick={() => setActiveFilter('all')}
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Show All Tasks
-              </button>
-            </motion.div>
-) : (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Your Tasks
-                  {activeFilter !== 'all' && (
-                    <span className="ml-2 text-sm font-normal text-blue-600">
-                      ({filterOptions.find(f => f.key === activeFilter)?.label})
-                    </span>
-                  )}
-                </h2>
-                <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                  {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
-                </span>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Your Tasks
+                    {activeFilter !== 'all' && (
+                      <span className="ml-2 text-sm font-normal text-blue-600">
+                        ({filterOptions.find(f => f.key === activeFilter)?.label})
+                      </span>
+                    )}
+                  </h2>
+                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
+                  </span>
+                </div>
+                
+                <TaskList 
+                  tasks={sortedTasks}
+                  onUpdateTask={handleTaskUpdate}
+                  onDeleteTask={handleTaskDelete}
+                  onEditTask={handleTaskEdit}
+                />
               </div>
-              
-              <TaskList 
-                tasks={filteredTasks}
-                onUpdateTask={handleTaskUpdate}
-                onDeleteTask={handleTaskDelete}
-                onEditTask={handleTaskEdit}
-              />
-            </div>
+            </motion.div>
           )}
         </motion.div>
-
-{/* Add Task Modal */}
-        <AddTaskModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onTaskAdded={handleTaskAdded}
-        />
         
-        <EditTaskModal
-          isOpen={!!editingTaskId}
-          onClose={() => setEditingTaskId(null)}
-          task={tasks.find(t => t.Id === editingTaskId)}
-          onTaskUpdated={handleTaskUpdate}
-        />
-        </motion.div>
+        {/* Add Task Modal */}
+        <AnimatePresence>
+          {isModalOpen && (
+            <AddTaskModal 
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onTaskAdded={handleTaskAdded}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {editingTaskId && (
+            <EditTaskModal
+              isOpen={!!editingTaskId}
+              onClose={() => setEditingTaskId(null)}
+              task={tasks.find(t => t.Id === editingTaskId)}
+              onTaskUpdated={handleTaskUpdate}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
