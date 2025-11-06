@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
+import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Checkbox from "@/components/atoms/Checkbox";
-import { taskService } from "@/services/api/taskService";
 
 const TaskItem = ({ task, onUpdate, onDelete, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -51,7 +51,12 @@ const TaskItem = ({ task, onUpdate, onDelete, onEdit }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
           whileHover={{ y: -2 }}
-          className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200 hover:shadow-md ${
+            task.priority === 'High' ? 'border-l-4 border-l-red-500 border-red-100' :
+            task.priority === 'Medium' ? 'border-l-4 border-l-yellow-500 border-yellow-100' :
+            task.priority === 'Low' ? 'border-l-4 border-l-green-500 border-green-100' :
+            'border-gray-100'
+          }`}
         >
           <div className="flex items-start gap-4">
             <div className="pt-1">
@@ -81,48 +86,57 @@ const TaskItem = ({ task, onUpdate, onDelete, onEdit }) => {
                   {truncateDescription(task.description)}
                 </p>
               )}
-<div className="flex items-center gap-4 text-xs text-gray-400">
-                <div className="flex items-center gap-1">
-                  <ApperIcon name="Calendar" className="w-3 h-3" />
-                  <span>Created {format(new Date(task.createdAt), "MMM d, yyyy")}</span>
-                </div>
-                {task.dueDate && (
-                  <div className={`flex items-center gap-1 ${
-                    new Date(task.dueDate) < new Date().setHours(0,0,0,0) 
-                      ? 'text-error' 
-                      : 'text-warning'
-                  }`}>
-                    <ApperIcon name="Clock" className="w-3 h-3" />
-                    <span>Due {format(new Date(task.dueDate), "MMM d, yyyy")}</span>
-                  </div>
-                )}
-                {task.completed && (
+<div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
-                    <ApperIcon name="CheckCircle" className="w-3 h-3 text-success" />
-                    <span className="text-success">Completed</span>
+                    <ApperIcon name="Calendar" className="w-3 h-3" />
+                    <span>Created {format(new Date(task.createdAt), "MMM d, yyyy")}</span>
                   </div>
-                )}
+                  {task.dueDate && (
+                    <div className="flex items-center gap-1">
+                      <ApperIcon name="Clock" className="w-3 h-3" />
+                      <span>Due {format(new Date(task.dueDate), "MMM d, yyyy")}</span>
+                    </div>
+                  )}
+                  {task.completed && (
+                    <div className="flex items-center gap-1">
+                      <ApperIcon name="CheckCircle" className="w-3 h-3 text-success" />
+                      <span className="text-success">Completed</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    task.priority === 'High' ? 'bg-red-100 text-red-800' :
+                    task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                    task.priority === 'Low' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {task.priority || 'Medium'}
+                  </span>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => onEdit && onEdit(task)}
+                    className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                    title="Edit task"
+                  >
+                    <ApperIcon name="Edit3" className="w-4 h-4" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleDelete}
+                    className="p-2 text-gray-400 hover:text-error hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete task"
+                  >
+                    <ApperIcon name="Trash2" className="w-4 h-4" />
+                  </motion.button>
+                </div>
               </div>
             </div>
-
-<motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => onEdit && onEdit(task)}
-              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-              title="Edit task"
-            >
-              <ApperIcon name="Edit3" className="w-4 h-4" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleDelete}
-              className="p-2 text-gray-400 hover:text-error hover:bg-red-50 rounded-lg transition-colors"
-              title="Delete task"
-            >
-              <ApperIcon name="Trash2" className="w-4 h-4" />
-            </motion.button>
           </div>
         </motion.div>
       )}

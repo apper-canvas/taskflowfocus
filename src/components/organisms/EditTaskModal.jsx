@@ -11,16 +11,18 @@ const EditTaskModal = ({ isOpen, onClose, task, onTaskUpdated }) => {
 const [formData, setFormData] = useState({
     title: "",
     description: "",
-    dueDate: ""
+    dueDate: "",
+    priority: "Medium"
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
 if (task) {
-      setFormData({
+setFormData({
         title: task.title || "",
         description: task.description || "",
-        dueDate: task.dueDate ? task.dueDate.split('T')[0] : ""
+        dueDate: task.dueDate ? task.dueDate.split('T')[0] : "",
+        priority: task.priority || "Medium"
       });
     }
   }, [task]);
@@ -38,7 +40,8 @@ if (task) {
 const updatedTask = await taskService.update(task.Id, {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        dueDate: formData.dueDate || null
+        dueDate: formData.dueDate || null,
+        priority: formData.priority
       });
       
       if (updatedTask) {
@@ -59,10 +62,11 @@ const updatedTask = await taskService.update(task.Id, {
     if (!isSubmitting) {
       // Reset form to original task data
 if (task) {
-        setFormData({
+setFormData({
           title: task.title || "",
           description: task.description || "",
-          dueDate: task.dueDate ? task.dueDate.split('T')[0] : ""
+          dueDate: task.dueDate ? task.dueDate.split('T')[0] : "",
+          priority: task.priority || "Medium"
         });
       }
       onClose();
@@ -135,6 +139,23 @@ if (task) {
                   rows={4}
                   disabled={isSubmitting}
                 />
+              </div>
+
+<div>
+                <label htmlFor="edit-priority" className="block text-sm font-medium text-gray-700 mb-2">
+                  Priority Level
+                </label>
+                <select
+                  id="edit-priority"
+                  value={formData.priority}
+                  onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+                  disabled={isSubmitting}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                >
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
               </div>
 
               <div>

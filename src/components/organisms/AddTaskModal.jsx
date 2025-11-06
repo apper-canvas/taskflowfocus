@@ -11,7 +11,8 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded }) => {
 const [formData, setFormData] = useState({
     title: "",
     description: "",
-    dueDate: ""
+    dueDate: "",
+    priority: "Medium"
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,11 +29,12 @@ const [formData, setFormData] = useState({
 const newTask = await taskService.create({
         title: formData.title.trim(),
         description: formData.description.trim(),
-        dueDate: formData.dueDate || null
+        dueDate: formData.dueDate || null,
+        priority: formData.priority
       });
       
-      onTaskAdded(newTask);
-setFormData({ title: "", description: "", dueDate: "" });
+onTaskAdded(newTask);
+      setFormData({ title: "", description: "", dueDate: "", priority: "Medium" });
       onClose();
       toast.success("Task created successfully! 🎯");
     } catch (error) {
@@ -44,7 +46,7 @@ setFormData({ title: "", description: "", dueDate: "" });
 
   const handleClose = () => {
     if (!isSubmitting) {
-setFormData({ title: "", description: "", dueDate: "" });
+setFormData({ title: "", description: "", dueDate: "", priority: "Medium" });
       onClose();
     }
   };
@@ -116,6 +118,22 @@ setFormData({ title: "", description: "", dueDate: "" });
                   disabled={isSubmitting}
                 />
 </div>
+<div>
+                <label htmlFor="add-priority" className="block text-sm font-medium text-gray-700 mb-2">
+                  Priority Level
+                </label>
+                <select
+                  id="add-priority"
+                  value={formData.priority}
+                  onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+                  disabled={isSubmitting}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                >
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
 
               <div>
                 <label htmlFor="add-due-date" className="block text-sm font-medium text-gray-700 mb-2">

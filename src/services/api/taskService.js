@@ -51,6 +51,7 @@ const tasks = this.getTasks();
           title: taskData.title,
           description: taskData.description,
           dueDate: taskData.dueDate || null,
+          priority: taskData.priority || 'Medium',
           completed: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
@@ -74,6 +75,7 @@ const updatedTask = {
             ...tasks[taskIndex],
             ...taskData,
             dueDate: taskData.dueDate !== undefined ? taskData.dueDate : tasks[taskIndex].dueDate,
+            priority: taskData.priority !== undefined ? taskData.priority : tasks[taskIndex].priority,
             updatedAt: new Date().toISOString()
           };
           tasks[taskIndex] = updatedTask;
