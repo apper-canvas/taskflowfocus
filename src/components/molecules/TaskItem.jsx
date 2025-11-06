@@ -81,12 +81,21 @@ const TaskItem = ({ task, onUpdate, onDelete, onEdit }) => {
                   {truncateDescription(task.description)}
                 </p>
               )}
-
-              <div className="flex items-center gap-4 text-xs text-gray-400">
+<div className="flex items-center gap-4 text-xs text-gray-400">
                 <div className="flex items-center gap-1">
                   <ApperIcon name="Calendar" className="w-3 h-3" />
                   <span>Created {format(new Date(task.createdAt), "MMM d, yyyy")}</span>
                 </div>
+                {task.dueDate && (
+                  <div className={`flex items-center gap-1 ${
+                    new Date(task.dueDate) < new Date().setHours(0,0,0,0) 
+                      ? 'text-error' 
+                      : 'text-warning'
+                  }`}>
+                    <ApperIcon name="Clock" className="w-3 h-3" />
+                    <span>Due {format(new Date(task.dueDate), "MMM d, yyyy")}</span>
+                  </div>
+                )}
                 {task.completed && (
                   <div className="flex items-center gap-1">
                     <ApperIcon name="CheckCircle" className="w-3 h-3 text-success" />

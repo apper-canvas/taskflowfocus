@@ -8,17 +8,19 @@ import Textarea from "@/components/atoms/Textarea";
 import { taskService } from "@/services/api/taskService";
 
 const EditTaskModal = ({ isOpen, onClose, task, onTaskUpdated }) => {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
-    description: ""
+    description: "",
+    dueDate: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (task) {
+if (task) {
       setFormData({
         title: task.title || "",
-        description: task.description || ""
+        description: task.description || "",
+        dueDate: task.dueDate ? task.dueDate.split('T')[0] : ""
       });
     }
   }, [task]);
@@ -33,9 +35,10 @@ const EditTaskModal = ({ isOpen, onClose, task, onTaskUpdated }) => {
 
     setIsSubmitting(true);
     try {
-      const updatedTask = await taskService.update(task.Id, {
+const updatedTask = await taskService.update(task.Id, {
         title: formData.title.trim(),
-        description: formData.description.trim()
+        description: formData.description.trim(),
+        dueDate: formData.dueDate || null
       });
       
       if (updatedTask) {
@@ -55,10 +58,11 @@ const EditTaskModal = ({ isOpen, onClose, task, onTaskUpdated }) => {
   const handleClose = () => {
     if (!isSubmitting) {
       // Reset form to original task data
-      if (task) {
+if (task) {
         setFormData({
           title: task.title || "",
-          description: task.description || ""
+          description: task.description || "",
+          dueDate: task.dueDate ? task.dueDate.split('T')[0] : ""
         });
       }
       onClose();
@@ -117,7 +121,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onTaskUpdated }) => {
                   disabled={isSubmitting}
                   autoFocus
                 />
-              </div>
+</div>
 
               <div>
                 <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 mb-2">
@@ -130,6 +134,20 @@ const EditTaskModal = ({ isOpen, onClose, task, onTaskUpdated }) => {
                   placeholder="Add any additional details..."
                   rows={4}
                   disabled={isSubmitting}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-due-date" className="block text-sm font-medium text-gray-700 mb-2">
+                  Due Date (Optional)
+                </label>
+                <Input
+                  id="edit-due-date"
+                  type="date"
+                  value={formData.dueDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                  disabled={isSubmitting}
+                  className="w-full"
                 />
               </div>
 

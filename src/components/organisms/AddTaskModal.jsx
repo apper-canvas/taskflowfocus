@@ -8,9 +8,10 @@ import Textarea from "@/components/atoms/Textarea";
 import { taskService } from "@/services/api/taskService";
 
 const AddTaskModal = ({ isOpen, onClose, onTaskAdded }) => {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
-    description: ""
+    description: "",
+    dueDate: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,13 +25,14 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded }) => {
 
     setIsSubmitting(true);
     try {
-      const newTask = await taskService.create({
+const newTask = await taskService.create({
         title: formData.title.trim(),
-        description: formData.description.trim()
+        description: formData.description.trim(),
+        dueDate: formData.dueDate || null
       });
       
       onTaskAdded(newTask);
-      setFormData({ title: "", description: "" });
+setFormData({ title: "", description: "", dueDate: "" });
       onClose();
       toast.success("Task created successfully! 🎯");
     } catch (error) {
@@ -42,7 +44,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded }) => {
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setFormData({ title: "", description: "" });
+setFormData({ title: "", description: "", dueDate: "" });
       onClose();
     }
   };
@@ -112,6 +114,20 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded }) => {
                   placeholder="Add any additional details..."
                   rows={4}
                   disabled={isSubmitting}
+                />
+</div>
+
+              <div>
+                <label htmlFor="add-due-date" className="block text-sm font-medium text-gray-700 mb-2">
+                  Due Date (Optional)
+                </label>
+                <Input
+                  id="add-due-date"
+                  type="date"
+                  value={formData.dueDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                  disabled={isSubmitting}
+                  className="w-full"
                 />
               </div>
 

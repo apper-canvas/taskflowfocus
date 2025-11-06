@@ -1,5 +1,4 @@
 import mockTasks from "../mockData/tasks.json";
-
 class TaskService {
   constructor() {
     this.storageKey = "taskflow_tasks";
@@ -45,12 +44,13 @@ class TaskService {
   async create(taskData) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const tasks = this.getTasks();
+const tasks = this.getTasks();
         const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0;
         const newTask = {
           Id: maxId + 1,
           title: taskData.title,
           description: taskData.description,
+          dueDate: taskData.dueDate || null,
           completed: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
@@ -70,9 +70,10 @@ class TaskService {
         const taskIndex = tasks.findIndex(t => t.Id === parseInt(id));
         
         if (taskIndex !== -1) {
-          const updatedTask = {
+const updatedTask = {
             ...tasks[taskIndex],
             ...taskData,
+            dueDate: taskData.dueDate !== undefined ? taskData.dueDate : tasks[taskIndex].dueDate,
             updatedAt: new Date().toISOString()
           };
           tasks[taskIndex] = updatedTask;
